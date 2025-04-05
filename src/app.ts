@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
+import fjwt from '@fastify/jwt';
 import dotenv from 'dotenv';
 import fastify from 'fastify';
 import { FastifyInstance } from 'fastify';
-import fastifyJwt from 'fastify-jwt';
 import pino from 'pino';
 import { Sequelize } from 'sequelize';
 
@@ -14,6 +14,7 @@ import User from './models/user.model';
 import authRoutes from './routes/auth.routes';
 // import PostRoutes from './routes/post.routes';
 import userRoutes from './routes/user.routes';
+// import { authenticate } from './utils/jwt.utils';
 
 dotenv.config();
 
@@ -41,21 +42,22 @@ export async function createApp() {
     },
   });
 
-  app.register(fastifyJwt, {
-    secret: process.env.JWT_SECRET || 'your-secret-key', // Đảm bảo rằng bạn đã cấu hình secret trong biến môi trường
+  app.register(fjwt, {
+    secret: process.env.JWT_SECRET,
   });
+  console.log('JWT Secret:', process.env.JWT_SECRET);
 
-  app.addHook('onRequest', async (request, reply) => {
+  // Đăng ký phương thức authenticate
+  app.decorate('authenticate', async (request, reply) => {
     try {
-      const token = request.headers['authorization']?.split(' ')[1]; // Lấy token từ header Authorization
-      if (token) {
-        const decoded = app.jwt.verify(token); // Giải mã token
-        request.user = decoded; // Gán user vào request
-      } else {
-        reply.status(401).send({ error: 'Unauthorized: Token is missing' });
-      }
-    } catch (error) {
-      reply.status(401).send({ error: 'Unauthorized: Invalid token' });
+      await request.jwtVerify();
+    } catch (err) {
+      console.log(err);
+      reply.status(401).send({
+        statusCode: 401,
+        error: 'Unauthorized',
+        message: 'Invalid or expired token',
+      });
     }
   });
 
@@ -82,6 +84,8 @@ export async function setupDatabase(app: FastifyInstance) {
 
 export async function setupRoutes(app: FastifyInstance) {
   // Đăng ký routes
+  // await app.register(authenticate);
+
   app.register(authRoutes, { prefix: '/api/auth' });
   app.register(userRoutes, { prefix: '/api/users' });
   // app.register(PostRoutes, { prefix: '/api/posts' });

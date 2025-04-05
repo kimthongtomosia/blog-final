@@ -1,30 +1,43 @@
+import dotenv from 'dotenv';
 import { FastifyInstance } from 'fastify';
 
-import User from '../models/user.model';
+import {
+  registerUser,
+  testMail,
+  verifyEmail,
+  loginUsers,
+  refreshToken,
+  logoutUsers,
+  forgotPassword,
+  resetPassword,
+} from '../controllers/auth.controller';
+import {
+  registerUserSchema,
+  testMailSchema,
+  loginUserSchema,
+  refreshTokenSchema,
+  logoutUserSchema,
+  verifyEmailSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from '../schemas/auth.schema';
+
+dotenv.config();
 
 export default async function authRoutes(fastify: FastifyInstance) {
-  // Route đăng nhập
-  fastify.post('/login', async (request, reply) => {
-    const { email, password } = request.body;
+  fastify.post('/register', registerUserSchema, registerUser);
 
-    try {
-      // Tìm người dùng trong cơ sở dữ liệu (hoặc một nơi nào đó)
-      const user = (await User.findOne({ where: { email } })) as User;
+  fastify.get('/test-email', testMailSchema, testMail);
 
-      if (!User || user.password !== password) {
-        return reply.status(401).send({ error: 'Invalid credentials' });
-      }
+  fastify.get('/verify-email', verifyEmailSchema, verifyEmail);
 
-      // Tạo JWT Token
-      const token = fastify.jwt.sign({
-        userId: user.id,
-        email: user.email,
-        isAdmin: user.is_admin,
-      });
+  fastify.post('/login', loginUserSchema, loginUsers);
 
-      reply.send({ token });
-    } catch (error) {
-      reply.status(500).send({ error: 'Internal Server Error' });
-    }
-  });
+  fastify.post('/refresh-token', refreshTokenSchema, refreshToken);
+
+  fastify.post('/logout', logoutUserSchema, logoutUsers);
+
+  fastify.post('/forgot-password', forgotPasswordSchema, forgotPassword);
+
+  fastify.post('/reset-password', resetPasswordSchema, resetPassword);
 }
