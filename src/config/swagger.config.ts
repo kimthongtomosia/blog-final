@@ -16,14 +16,41 @@ export async function setupSwagger(app: FastifyInstance) {
           description: 'Local server',
         },
       ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
+      security: [{ bearerAuth: [] }],
     },
+    hideUntagged: true,
   });
-
   await app.register(swaggerUi, {
     routePrefix: '/docs',
     uiConfig: {
       docExpansion: 'list',
-      deepLinking: false,
+      deepLinking: true,
+      persistAuthorization: true,
+      filter: true,
     },
+    staticCSP: true,
+    initOAuth: {},
+    uiHooks: {
+      onRequest: function (request, reply, next) {
+        next();
+      },
+      preHandler: function (request, reply, next) {
+        next();
+      },
+    },
+  });
+
+  // Thêm route test để kiểm tra
+  app.get('/docs/healthcheck', async () => {
+    return { status: 'Swagger UI is working' };
   });
 }

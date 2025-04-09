@@ -9,13 +9,18 @@ interface UserAttributes {
   avatar_url: string | null;
   is_active: boolean;
   is_admin: boolean;
+  is_verified: boolean;
+  verification_token: string | null;
   created_at: Date;
   updated_at: Date;
+  refresh_token?: string | null;
+  password_ResetToken?: string | null;
+  password_ResetExpires?: number | null;
 }
 
 type UserCreationAttributes = Optional<
   UserAttributes,
-  'id' | 'avatar_url' | 'is_active' | 'is_admin' | 'created_at' | 'updated_at'
+  'id' | 'avatar_url' | 'is_active' | 'is_admin' | 'created_at' | 'updated_at' | 'is_verified' | 'verification_token'
 >;
 
 export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
@@ -27,8 +32,25 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public avatar_url!: string | null;
   public is_active!: boolean;
   public is_admin!: boolean;
+  public is_verified!: boolean;
+  public verification_token!: string | null;
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
+  public refresh_token: string | null;
+  public password_ResetToken: string | null;
+  public password_ResetExpires: number | null;
+
+  setPassword(value: string) {
+    this.password = value;
+  }
+
+  setRefreshToken(value: string | null) {
+    this.refresh_token = value;
+  }
+
+  async comparePassword(candidatePassword: string): Promise<boolean> {
+    return candidatePassword === this.password;
+  }
 
   static initialize(sequelize: Sequelize) {
     return this.init(
@@ -69,6 +91,26 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
         is_admin: {
           type: DataTypes.BOOLEAN,
           defaultValue: false,
+        },
+        is_verified: {
+          type: DataTypes.BOOLEAN,
+          defaultValue: false,
+        },
+        verification_token: {
+          type: DataTypes.STRING(255),
+          allowNull: true,
+        },
+        refresh_token: {
+          type: DataTypes.STRING,
+          allowNull: true,
+        },
+        password_ResetToken: {
+          type: DataTypes.STRING,
+          allowNull: true,
+        },
+        password_ResetExpires: {
+          type: DataTypes.INTEGER,
+          allowNull: true,
         },
         created_at: {
           type: DataTypes.DATE,

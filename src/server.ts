@@ -1,9 +1,14 @@
+import cors from '@fastify/cors';
+
 import { createApp, setupDatabase, setupRoutes } from './app';
 import { setupSwagger } from './config/swagger.config';
 
 const start = async () => {
   try {
     const app = await createApp();
+    app.register(cors, {
+      origin: ['*'],
+    });
 
     // Thiết lập database
     await setupDatabase(app);
