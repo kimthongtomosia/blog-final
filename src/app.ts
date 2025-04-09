@@ -12,9 +12,11 @@ import { Sequelize } from 'sequelize';
 
 import sequelizePlugin from './config/db.config';
 // import Post from './models/post.model';
+import Category from './models/category.model';
 import User from './models/user.model';
 import authRoutes from './routes/auth.routes';
 // import PostRoutes from './routes/post.routes';
+import cateRoutes from './routes/category.routes';
 import userRoutes from './routes/user.routes';
 // import { authenticate } from './utils/jwt.utils';
 
@@ -56,7 +58,7 @@ export async function createApp() {
 
   await app.register(multipart, {
     limits: {
-      fileSize: 10 * 1024 * 1024,
+      fileSize: 10 * 300 * 300,
       files: 1,
     },
   });
@@ -86,6 +88,7 @@ export async function setupDatabase(app: FastifyInstance) {
 
   // 3. Khởi tạo model
   User.initialize(sequelize);
+  Category.initialize(sequelize);
   // Post.initModel(sequelize);
 
   // 4. Đồng bộ model với database (chỉ cho development)
@@ -101,6 +104,7 @@ export async function setupRoutes(app: FastifyInstance) {
 
   app.register(authRoutes, { prefix: '/api/auth' });
   app.register(userRoutes, { prefix: '/api/users' });
+  app.register(cateRoutes, { prefix: '/api/categories' });
   // app.register(PostRoutes, { prefix: '/api/posts' });
 
   app.get(
