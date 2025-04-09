@@ -13,11 +13,6 @@ module.exports = {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
-      slug: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-        unique: true,
-      },
       content: {
         type: DataTypes.TEXT,
         allowNull: false,

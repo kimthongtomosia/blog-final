@@ -3,7 +3,6 @@ import { DataTypes, Model, Sequelize } from 'sequelize';
 interface PostAttributes {
   id: number;
   title: string;
-  slug: string;
   content: string;
   excerpt: string | null;
   status: 'draft' | 'published' | 'private';
@@ -18,7 +17,6 @@ interface PostAttributes {
 export default class Post extends Model<PostAttributes> implements PostAttributes {
   public id!: number;
   public title!: string;
-  public slug!: string;
   public content!: string;
   public excerpt!: string | null;
   public status!: 'draft' | 'published' | 'private';
@@ -40,11 +38,6 @@ export default class Post extends Model<PostAttributes> implements PostAttribute
         title: {
           type: DataTypes.STRING(255),
           allowNull: false,
-        },
-        slug: {
-          type: DataTypes.STRING(255),
-          allowNull: false,
-          unique: true,
         },
         content: {
           type: DataTypes.TEXT,
