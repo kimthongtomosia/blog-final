@@ -39,8 +39,18 @@ export const updateUserMeSchema = {
     body: {
       type: 'object',
       properties: {
-        first_name: { type: 'string' },
-        last_name: { type: 'string' },
+        first_name: {
+          type: 'string',
+          minLength: 1,
+          maxLength: 18,
+          description: 'first name greater than 1 and less than 18',
+        },
+        last_name: {
+          type: 'string',
+          minLength: 1,
+          maxLength: 18,
+          description: 'first name greater than 1 and less than 18',
+        },
         email: { type: 'string', format: 'email' },
         avatar_url: { type: ['string', 'null'] },
       },
@@ -55,14 +65,23 @@ export const updateUserMeSchema = {
 export const changePasswordSchema = {
   schema: {
     summary: 'Change User Password',
-    description: 'Đổi mật khẩu người dùng hiện tại.',
+    description: 'Change User Password.',
     tags: ['Users'],
     body: {
       type: 'object',
-      required: ['oldPassword', 'newPassword'],
+      required: ['old_Password', 'new_Password'],
       properties: {
-        oldPassword: { type: 'string' },
-        newPassword: { type: 'string' },
+        old_Password: {
+          type: 'string',
+        },
+        new_Password: {
+          type: 'string',
+          minLength: 8,
+          maxLength: 16,
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,16}$',
+          description:
+            'Password must be 8-16 characters, contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
+        },
       },
     },
     response: {
@@ -95,6 +114,27 @@ export const getUserByIdSchema = {
         },
       },
       404: { type: 'object', properties: { error: { type: 'string' } } },
+    },
+  },
+};
+
+// update avatar
+
+export const editAvatarSchema = {
+  schema: {
+    summary: 'Upload Avatar',
+    description: 'Upload user avatar.',
+    tags: ['Users'],
+    headers: {
+      type: 'object',
+      properties: {
+        'Content-Type': {
+          type: 'string',
+          pattern: '^multipart/form-data',
+          description: 'Content type must be multipart/form-data',
+        },
+      },
+      required: ['Content-Type'],
     },
   },
 };

@@ -1,31 +1,24 @@
 import { FastifyInstance } from 'fastify';
 
-import { getUserMe, updateUserMe, changePassword, getUserById } from '../controllers/user.controller';
-import { getUserMeSchema, updateUserMeSchema, changePasswordSchema, getUserByIdSchema } from '../schemas/user.schema';
+import UserController from '../controllers/user.controller';
+import {
+  getUserMeSchema,
+  updateUserMeSchema,
+  changePasswordSchema,
+  getUserByIdSchema,
+  editAvatarSchema,
+} from '../schemas/user.schema';
 
 export default async function (fastify: FastifyInstance) {
-  // GET /users/me - Yêu cầu xác thực JWT
-  fastify.post('/me', { ...getUserMeSchema, onRequest: [fastify.authenticate] }, getUserMe);
+  fastify.register(async function (authenticatedRoutes) {
+    authenticatedRoutes.addHook('onRequest', fastify.authenticate);
+    authenticatedRoutes.get('/me', getUserMeSchema, UserController.index);
+    authenticatedRoutes.put('/me', updateUserMeSchema, UserController.update);
+    authenticatedRoutes.post('/me/change-password', changePasswordSchema, UserController.changePassword);
+    // update avatar
+    authenticatedRoutes.put('/me/avatar', editAvatarSchema, UserController.editAvatar);
+  });
 
-  // PUT /users/me - Yêu cầu xác thực JWT
-  fastify.put(
-    '/me',
-    {
-      ...updateUserMeSchema,
-      onRequest: [fastify.authenticate],
-    },
-    updateUserMe
-  );
-
-  // POST /users/me/change-password - Yêu cầu xác thực JWT
-  fastify.post(
-    '/me/change-password',
-    {
-      ...changePasswordSchema,
-      onRequest: [fastify.authenticate],
-    },
-    changePassword
-  );
-
-  fastify.get('/:id', getUserByIdSchema, getUserById);
+  // GET /users/:id - Lấy thông tin user theo ID (public)
+  fastify.get('/:id', getUserByIdSchema, UserController.show);
 }

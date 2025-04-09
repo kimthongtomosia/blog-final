@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 
 import fjwt from '@fastify/jwt';
+import multipart from '@fastify/multipart';
+import fastifyStatic from '@fastify/static';
 import dotenv from 'dotenv';
 import fastify from 'fastify';
 import { FastifyInstance } from 'fastify';
@@ -47,6 +49,17 @@ export async function createApp() {
   });
   console.log('JWT Secret:', process.env.JWT_SECRET);
 
+  app.register(fastifyStatic, {
+    root: path.join(__dirname, '..'),
+    prefix: '/images/',
+  });
+
+  await app.register(multipart, {
+    limits: {
+      fileSize: 10 * 1024 * 1024,
+      files: 1,
+    },
+  });
   // Đăng ký phương thức authenticate
   app.decorate('authenticate', async (request, reply) => {
     try {

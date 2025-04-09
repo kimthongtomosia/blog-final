@@ -14,8 +14,8 @@ interface UserAttributes {
   created_at: Date;
   updated_at: Date;
   refresh_token?: string | null;
-  passwordResetToken?: string | null;
-  passwordResetExpires?: number | null;
+  password_ResetToken?: string | null;
+  password_ResetExpires?: number | null;
 }
 
 type UserCreationAttributes = Optional<
@@ -37,8 +37,8 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
   public refresh_token: string | null;
-  public passwordResetToken: string | null;
-  public passwordResetExpires: number | null;
+  public password_ResetToken: string | null;
+  public password_ResetExpires: number | null;
 
   setPassword(value: string) {
     this.password = value;
@@ -49,10 +49,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   }
 
   async comparePassword(candidatePassword: string): Promise<boolean> {
-    // Implement password comparison logic here
-    // This should compare candidatePassword with this.password
-    // Return true if they match, false otherwise
-    return candidatePassword === this.password; // Replace with actual hash comparison
+    return candidatePassword === this.password;
   }
 
   static initialize(sequelize: Sequelize) {
@@ -107,15 +104,14 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
           type: DataTypes.STRING,
           allowNull: true,
         },
-        passwordResetToken: {
+        password_ResetToken: {
           type: DataTypes.STRING,
           allowNull: true,
         },
-        passwordResetExpires: {
+        password_ResetExpires: {
           type: DataTypes.INTEGER,
           allowNull: true,
         },
-        // Khai báo lại created_at và updated_at
         created_at: {
           type: DataTypes.DATE,
           allowNull: false,
@@ -131,8 +127,8 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
         sequelize,
         modelName: 'user',
         tableName: 'users',
-        timestamps: true, // Sequelize sẽ tự động quản lý các trường created_at và updated_at
-        underscored: true, // Sử dụng snake_case cho tên trường
+        timestamps: true,
+        underscored: true,
       }
     );
   }

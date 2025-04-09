@@ -97,7 +97,11 @@ export const testMail = async (request: FastifyRequest, reply: FastifyReply) => 
   }
 };
 
-export const verifyEmail = async (request: FastifyRequest, reply: FastifyReply) => {
+interface VerifyEmailQuery {
+  token?: string;
+}
+
+export const verifyEmail = async (request: FastifyRequest<{ Querystring: VerifyEmailQuery }>, reply: FastifyReply) => {
   const { token } = request.query as any;
 
   if (!token) {
@@ -114,10 +118,19 @@ export const verifyEmail = async (request: FastifyRequest, reply: FastifyReply) 
   user.verification_token = null;
   await user.save();
 
-  reply.status(200).send({ message: 'Email đã được xác thực thành công' });
+  try {
+    reply.status(200).send({ message: 'Verify Email Successfully' });
+  } catch (error) {
+    reply.status(500).send({ error: 'Verify Email Fail', details: error.message });
+  }
 };
 // Đăng nhập người dùng
-export const loginUsers = async (request: FastifyRequest, reply: FastifyReply) => {
+
+interface LoginBody {
+  email?: string;
+  password?: string;
+}
+export const loginUsers = async (request: FastifyRequest<{ Querystring: LoginBody }>, reply: FastifyReply) => {
   const { email, password } = request.body as any;
 
   try {
@@ -136,8 +149,8 @@ export const loginUsers = async (request: FastifyRequest, reply: FastifyReply) =
     // Tạo Access Token
     const accessToken = jwt.sign(
       { userId: user.id, email: user.email }, // Payload
-      process.env.JWT_SECRET as string, // Secret (ép kiểu)
-      { expiresIn: parseInt(process.env.JWT_EXPIRES_IN as string, 10) } // Options (ép kiểu)
+      process.env.JWT_SECRET, // Secret (ép kiểu)
+      { expiresIn: parseInt(process.env.JWT_EXPIRES_IN, 10) } // Options (ép kiểu)
     );
     console.info('User:', user);
     console.info('Access Token:', accessToken);
@@ -145,8 +158,8 @@ export const loginUsers = async (request: FastifyRequest, reply: FastifyReply) =
     // Tạo Refresh Token
     const refreshToken = jwt.sign(
       { userId: user.id }, // Payload
-      process.env.REFRESH_TOKEN_SECRET as string,
-      { expiresIn: parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN as string, 10) }
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN, 10) }
     );
 
     console.info('User:', user);
@@ -154,7 +167,7 @@ export const loginUsers = async (request: FastifyRequest, reply: FastifyReply) =
     console.info('Generating access token...');
 
     // Lưu Refresh Token vào cơ sở dữ liệu
-    user.refresh_token = refreshToken;
+    // user.refresh_token = refreshToken;
     await user.save();
 
     // Kiểm tra lại sau khi lưu
@@ -162,11 +175,11 @@ export const loginUsers = async (request: FastifyRequest, reply: FastifyReply) =
     console.info('Updated User:', updatedUser);
 
     // Kiểm tra nếu refreshToken đã được lưu
-    if (updatedUser?.refresh_token === refreshToken) {
-      console.log('Refresh token has been saved successfully');
-    } else {
-      console.log('Failed to save refresh token');
-    }
+    // if (updatedUser?.refresh_token === refreshToken) {
+    //   console.log('Refresh token has been saved successfully');
+    // } else {
+    //   console.log('Failed to save refresh token');
+    // }
 
     reply.send({ accessToken, refreshToken });
   } catch (error) {
@@ -234,8 +247,8 @@ export const forgotPassword = async (request: FastifyRequest, reply: FastifyRepl
   }
 
   const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-  user.passwordResetToken = token;
-  user.passwordResetExpires = Date.now() + 3600000;
+  user.password_ResetToken = token;
+  user.password_ResetExpires = Date.now() + 3600000;
   await user.save();
 
   const resetURl = `http://localhost:3000/api/auth/forgot-password?token=${token}`;
@@ -285,8 +298,8 @@ export const resetPassword = async (
     const user = await User.findOne({
       where: {
         id: decodedToken.id,
-        passwordResetToken: token,
-        passwordResetExpires: { $gt: Date.now() },
+        password_ResetToken: token,
+        password_ResetExpires: { $gt: Date.now() },
       },
     });
 
@@ -298,8 +311,8 @@ export const resetPassword = async (
     }
 
     user.password = request.body.password;
-    user.passwordResetToken = null;
-    user.passwordResetExpires = null;
+    user.password_ResetToken = null;
+    user.password_ResetExpires = null;
 
     await user.save();
 

@@ -4,6 +4,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 declare module 'fastify' {
   interface FastifyRequest {
     user: User;
+    file: any;
   }
 
   interface FastifyInstance {
