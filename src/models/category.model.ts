@@ -1,28 +1,29 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import { DataTypes, Model, Optional, Sequelize } from 'sequelize';
 
 interface CategoryAttributes {
   id: number;
   name: string;
   slug: string;
   description: string;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
-interface CategoryInstance extends Model<CategoryAttributes>, CategoryAttributes {
-  initialize(sequelize: Sequelize): void;
-}
+type CategoryCreationAttributes = Optional<
+  CategoryAttributes,
+  'id' | 'slug' | 'description' | 'created_at' | 'updated_at'
+>;
 
-export default class Category extends Model<CategoryInstance, CategoryAttributes> implements CategoryInstance {
+export class Category extends Model<CategoryAttributes, CategoryCreationAttributes> implements CategoryAttributes {
   public id!: number;
   public name!: string;
   public slug!: string;
   public description!: string;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  public readonly created_at!: Date;
+  public readonly updated_at!: Date;
 
-  public initialize(sequelize: Sequelize): void {
-    Category.init(
+  static initialize(sequelize: Sequelize) {
+    return this.init(
       {
         id: {
           type: DataTypes.INTEGER,
@@ -31,61 +32,36 @@ export default class Category extends Model<CategoryInstance, CategoryAttributes
         },
         name: {
           type: DataTypes.STRING,
+          allowNull: false,
         },
         slug: {
           type: DataTypes.STRING,
+          allowNull: false,
         },
         description: {
           type: DataTypes.STRING,
+          allowNull: true,
         },
-        createdAt: {
+        created_at: {
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: DataTypes.NOW,
         },
-        updatedAt: {
+        updated_at: {
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: DataTypes.NOW,
         },
-        _attributes: '',
-        sequelize: '',
-        destroy: '',
-        restore: '',
-        update: '',
-        increment: '',
-        decrement: '',
-        addHook: '',
-        removeHook: '',
-        hasHook: '',
-        hasHooks: '',
-        initialize: '',
-        dataValues: '',
-        _creationAttributes: '',
-        isNewRecord: '',
-        where: '',
-        getDataValue: '',
-        setDataValue: '',
-        get: '',
-        set: '',
-        setAttributes: '',
-        changed: '',
-        previous: '',
-        save: '',
-        reload: '',
-        validate: '',
-        equals: '',
-        equalsOneOf: '',
-        toJSON: '',
-        isSoftDeleted: '',
-        _model: '',
       },
       {
         sequelize,
         modelName: 'category',
         tableName: 'categories',
         timestamps: true,
+        underscored: true,
       }
     );
   }
 }
+
+export default Category;

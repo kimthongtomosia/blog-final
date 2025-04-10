@@ -3,31 +3,29 @@ import { DataTypes, Model, Sequelize } from 'sequelize';
 interface PostAttributes {
   id: number;
   title: string;
-  slug: string;
   content: string;
   excerpt: string | null;
   status: 'draft' | 'published' | 'private';
-  viewCount: number;
-  userId: number;
-  categoryId: number | null;
-  createdAt: Date;
-  updatedAt: Date;
-  publishedAt: Date | null;
+  view_Count: number;
+  user_id: number;
+  category_id: number | null;
+  created_at: Date;
+  updated_at: Date;
+  published_at: Date | null;
 }
 
 export default class Post extends Model<PostAttributes> implements PostAttributes {
   public id!: number;
   public title!: string;
-  public slug!: string;
   public content!: string;
   public excerpt!: string | null;
   public status!: 'draft' | 'published' | 'private';
-  public viewCount!: number;
-  public userId!: number;
-  public categoryId!: number | null;
-  public createdAt!: Date;
-  public updatedAt!: Date;
-  public publishedAt!: Date | null;
+  public view_Count!: number;
+  public user_id!: number;
+  public category_id!: number | null;
+  public created_at!: Date;
+  public updated_at!: Date;
+  public published_at!: Date | null;
 
   static initModel(sequelize: Sequelize) {
     Post.init(
@@ -40,11 +38,6 @@ export default class Post extends Model<PostAttributes> implements PostAttribute
         title: {
           type: DataTypes.STRING(255),
           allowNull: false,
-        },
-        slug: {
-          type: DataTypes.STRING(255),
-          allowNull: false,
-          unique: true,
         },
         content: {
           type: DataTypes.TEXT,
@@ -61,11 +54,11 @@ export default class Post extends Model<PostAttributes> implements PostAttribute
             isIn: [['draft', 'published', 'private']],
           },
         },
-        viewCount: {
+        view_Count: {
           type: DataTypes.INTEGER,
           defaultValue: 0,
         },
-        userId: {
+        user_id: {
           type: DataTypes.INTEGER,
           allowNull: false,
           references: {
@@ -74,7 +67,7 @@ export default class Post extends Model<PostAttributes> implements PostAttribute
           },
           onDelete: 'CASCADE',
         },
-        categoryId: {
+        category_id: {
           type: DataTypes.INTEGER,
           allowNull: true,
           references: {
@@ -83,17 +76,17 @@ export default class Post extends Model<PostAttributes> implements PostAttribute
           },
           onDelete: 'SET NULL',
         },
-        createdAt: {
+        created_at: {
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         },
-        updatedAt: {
+        updated_at: {
           type: DataTypes.DATE,
           allowNull: false,
           defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
         },
-        publishedAt: {
+        published_at: {
           type: DataTypes.DATE,
           allowNull: true,
         },
